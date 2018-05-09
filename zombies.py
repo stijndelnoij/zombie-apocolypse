@@ -111,12 +111,17 @@ def interactie(L_pos, L_zomb, dick, b, k):
             elif k / float(b + k) > p:
                 L_pos[x][y] = 3
                 L_delete.append(xy)
+                break
 
     for newzomb in L_add:
         xnew, ynew, L_dir = newzomb
         dick[(xnew, ynew)] = L_dir
-
+    #print L_delete
+    for zomb in L_remove:
+        xy, direct = zomb
+        dick[xy].remove(direct)
     for xy in L_delete:
+        #print dick
         dick = removekey(dick, xy)
         for direct in L_bonds:
             xnew, ynew = coordinates(direct, xy)
@@ -134,9 +139,9 @@ def interactie(L_pos, L_zomb, dick, b, k):
 
     return L_pos, L_zomb, dick
 
-n = 20
+n = 200
 L_pos, L_zomb, dick = zombies(n, 1.)
-print "%s" % len(L_pos[1])
+#print "%s" % len(L_pos[1])
 data = np.array(L_pos)
 plt.figure(1)
 plt.xlim(-0.5, n - 0.5)
@@ -144,8 +149,8 @@ plt.ylim(-0.5, n - 0.5)
 cmap = colors.ListedColormap(['white', 'red', 'green', 'black'])
 plt.imshow(data, interpolation='none', cmap=cmap, origin = 'lower')
 plt.figure(2)
-for i in range(5):
-    L_pos, L_zomb, dick = interactie(L_pos, L_zomb, dick, 0.1, 1)
+for i in range(100):
+    L_pos, L_zomb, dick = interactie(L_pos, L_zomb, dick, 1, 0.43)
 
 data = np.array(L_pos)
 plt.xlim(-0.5, n - 0.5)
