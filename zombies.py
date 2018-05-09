@@ -91,53 +91,6 @@ def zombies(n, p_thres):
     print "Factor mensen is %f" % (count / float(n ** 2))
     return L_pos, L_zomb, dick
 
-def interactie(L_pos, L_zomb, dick, b, k):
-    L_add, L_delete, L_remove = [], [], []
-    for xy in dick:
-        x = xy[0]
-        y = xy[1]
-        #print dick[xy]
-        for direct in dick[xy]:
-            L_dir = ['u', 'd', 'l', 'r']
-            p = random.random()
-            xnew, ynew = coordinates(direct, xy)
-            #print direct
-            if b / float(b + k) > p and xnew < len(L_pos[0]) and ynew < len(L_pos):
-                L_pos[xnew][ynew] = 1
-                L_remove.append((xy, direct))
-                L_dir.remove(opposite(direct))
-                L_add.append((xnew, ynew, L_dir))
-            
-            elif k / float(b + k) > p:
-                L_pos[x][y] = 3
-                L_delete.append(xy)
-                break
-
-    for newzomb in L_add:
-        xnew, ynew, L_dir = newzomb
-        dick[(xnew, ynew)] = L_dir
-    #print L_delete
-    for zomb in L_remove:
-        xy, direct = zomb
-        dick[xy].remove(direct)
-    for xy in L_delete:
-        #print dick
-        dick = removekey(dick, xy)
-        for direct in L_bonds:
-            xnew, ynew = coordinates(direct, xy)
-            if (xnew, ynew) in dick:
-                L = dick[(xnew, ynew)]
-
-                try:
-                    L.remove(opposite(direct))
-                    dick[(xnew, ynew)] = L
-
-                except:
-                    b = 1
-
-                
-
-    return L_pos, L_zomb, dick
 
 n = 200
 L_pos, L_zomb, dick = zombies(n, 1.)
