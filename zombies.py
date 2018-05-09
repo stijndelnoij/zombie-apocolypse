@@ -90,7 +90,7 @@ def interactie(L_pos, L_zomb, b, k):
 
     return L_pos, L_zomb, events
 
-n = 20
+n = 200
 L_pos, L_zomb = zombies(n, 1.)
 iterations = 0
 events = 1
@@ -98,7 +98,7 @@ L_Nzomb, L_t = [], []
 
 while events != 0:
     start = time.time()
-    L_pos, L_zomb, events = interactie(L_pos, L_zomb, 1, 0.0002)
+    L_pos, L_zomb, events = interactie(L_pos, L_zomb, 1, 0.43)
     end = time.time()
     dt = end - start
     L_t.append(dt)
