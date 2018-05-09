@@ -45,7 +45,7 @@ def zombies(n, p_thres):
     end1 = time.time()
     print "Runtime is %f" % (end1 - start1)
     print "Factor mensen is %f" % (count / float(n ** 2))
-    return L_pos, L_Zomb, dick
+    return L_pos, L_zomb, dick
 
 def interactie(L_pos, L_zomb, dick, b, k):
     for xy in L_zomb:
@@ -53,10 +53,17 @@ def interactie(L_pos, L_zomb, dick, b, k):
         y = xy[1]
         for direct in dick[xy]:
             p = random.random()
-            if b / float(b + k):
-                L_pos[]
+            if b / float(b + k) > p:
+                if direct == 'u':
+                    L_pos[x][y+1] = 2
+                    dick[(x,y)].remove('u')
+                    dick[(x,y+1)]=['d','l','r']
+                elif direct == 'd':
+                    L_pos[x][y-1] = 2
+                    dick[(x,y)].remove('d')
+                    dick[()]
 
-L_pos, L_zomb = zombies(200, 0.5)
+L_pos, L_zomb, dick = zombies(200, 0.5)
 data = np.array(L_pos)
 cmap = colors.ListedColormap(['black','red','green'])
 plt.imshow(data, interpolation='none', cmap=cmap, origin = 'lower')
