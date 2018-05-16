@@ -5,26 +5,13 @@ import math
 import numpy as np
 import time
 
-def coordinates(direct, xy):
+def coordinates(direct, xy): # coordinaten transformatie
     x = xy[0] 
     y = xy[1]
-    if direct == 'u':
-        x = x
-        y = y + 1
+    dick = {'u':[x, y + 1], 'd':[x, y - 1], 'l':[x - 1, y], 'r':[x + 1, y]}
+    templist = dick[direct]
 
-    elif direct == 'd':
-        x = x
-        y = y - 1
-
-    elif direct == 'l':
-        x = x - 1
-        y = y
-
-    elif direct == 'r':
-        x = x + 1
-        y = y
-    
-    return x, y
+    return templist[0], templist[1]
     
 def zombies(n, p_thres):
     count = 0
@@ -62,7 +49,7 @@ def interactie(L_pos, L_zomb, b, k):
             xnew, ynew = coordinates(direct, xy)
             if L_pos[xnew][ynew] == 2:
                 count = count + 1
-                
+
         if count > 0:
             if count == 4:
                 L_remove.append(xy)
