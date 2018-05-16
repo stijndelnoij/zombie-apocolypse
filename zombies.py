@@ -13,24 +13,31 @@ def coordinates(direct, xy): # coordinaten transformatie
 
     return templist[0], templist[1]
     
-def zombies(n, p_human):
+def zombies(n, p_human, p_zombie):
+    p_zombie = p_human + p_zombie
+    L_zomb = []
     count = 0
     start1 = time.time()
-    x0 = random.randint(0, n - 1)
-    y0 = random.randint(0, n - 1)
     L_pos = [[0] * (n + 1) for i in range(n + 1)] 
-    L_pos[x0][y0] = 1
-    xy = tuple([x0, y0])
-    L_zomb = [xy]
     for i in range(n):
         L_pos[i][n] = 3
 
     for i in range(n):
         for j in range(n):
             p = random.random()
-            if p < p_human and L_pos[i][j] == 0:
+            if p < p_human:
                 L_pos[i][j] = 2
                 count = count + 1
+            elif p < p_zombie:
+                L_pos[i][j] = 1
+                L_zomb.append((i, j))
+            else: L_pos[i][j] = 0
+
+    x0 = random.randint(0, n - 1)
+    y0 = random.randint(0, n - 1)
+    L_pos[x0][y0] = 1
+    xy = (x0, y0)
+    L_zomb.append(xy)
         
     end1 = time.time()
     print "Runtime is %f" % (end1 - start1)
@@ -86,27 +93,73 @@ def interactie(L_pos, L_zomb, a):
 
     return L_pos, L_zomb, events
 
-n = 200
-L_pos, L_zomb = zombies(n, 1.)
+def cluster(L_posfinal):
+    percolates = False
+    L_arrays = [L_posfinal, [list(x) for x in zip(*L_posfinal)]]
+    for L_posfinal in L_arrays:
+        n = len(L_posfinal)
+        L_tobechecked = []
+        neighbors = 0
+        for y in range(n):
+            if L_posfinal[0][y] == 1 and L_posfinal[1][y] == 1:
+                L_tobechecked.append(y)
+                neighbors = neighbors + 1
+
+        for x in range(1, n):
+            if neighbors == 0:
+                break
+            neighbors = 0
+            L_expanded = L_tobechecked
+            for y in L_tobechecked:
+                ynew = y
+                while L_posfinal[x][ynew + 1] == 1 and ynew + 1 not in L_tobechecked:
+                    L_expanded.append(ynew + 1)
+                    ynew = ynew + 1
+                ynew = y
+                while L_posfinal[x][ynew - 1] == 1 and ynew - 1 not in L_tobechecked:
+                    L_expanded.append(ynew - 1)
+                    ynew = ynew - 1
+                
+            L_tobechecked = []
+            for y in L_expanded:
+                if L_posfinal[x + 1][y] == 1:
+                    L_tobechecked.append(y)
+                    neighbors = neighbors + 1
+            
+        if x == n - 1:
+            percolates = True
+
+    return percolates
+        
+
+n = 2048
+L_pos, L_zomb = zombies(n, 1., 0)
 iterations = 0
 events = 1
 L_Nzomb, L_t = [], []
 
 while events != 0:
     start = time.time()
-    L_pos, L_zomb, events = interactie(L_pos, L_zomb, 0.4373)
+    L_pos, L_zomb, events = interactie(L_pos, L_zomb, 0.32)
     end = time.time()
     iterations = iterations + 1
     dt = end - start
     L_t.append(dt)
     L_Nzomb.append(len(L_zomb))
 
-plt.figure(1)
+if cluster(L_pos):
+    print 'This cluster of zombies percolates'
+
+else:
+    print 'This cluster of zombies does not percolate'
+
+plt.figure(2)
 data = np.array(L_pos)
 plt.xlim(-0.5, n - 0.5)
 plt.ylim(-0.5, n - 0.5)
 cmap = colors.ListedColormap(['white', 'red', 'green', 'black'])
 plt.imshow(data, interpolation='none', cmap=cmap, origin = 'lower')
-plt.figure(2)
-plt.plot(L_Nzomb, L_t)
+
+plt.figure(3)
+plt.plot(L_Nzomb, L_t, 'bo')
 plt.show()
