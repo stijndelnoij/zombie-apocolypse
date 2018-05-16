@@ -5,8 +5,6 @@ import math
 import numpy as np
 import time
 
-L_bonds = ['u', 'r', 'd', 'l']
-
 def coordinates(direct, xy):
     x = xy[0] 
     y = xy[1]
@@ -57,9 +55,20 @@ def interactie(L_pos, L_zomb, b, k):
     events = 0
     for xy in L_zomb:
         x, y = xy
-        if 0 <= x <= n - 1 and 0 <= y <= n - 1:
-            count = 0
-            for direct in L_bonds:
+        count = 0
+        L_bonds = ['u', 'r', 'd', 'l']
+        event = 0
+        for direct in L_bonds:
+            xnew, ynew = coordinates(direct, xy)
+            if L_pos[xnew][ynew] == 2:
+                count = count + 1
+                
+        if count > 0:
+            if count == 4:
+                L_remove.append(xy)
+            while event == 0:
+                randir = random.randint(0, len(L_bonds) - 1)
+                direct = L_bonds[randir]
                 xnew, ynew = coordinates(direct, xy)
                 if L_pos[xnew][ynew] == 2:
                     p = random.random()
@@ -70,12 +79,11 @@ def interactie(L_pos, L_zomb, b, k):
                     else:
                         L_pos[x][y] = 3
                         L_remove.append((x,y))
+
+                    event = 1
+
                 else:
-                    count = count + 1
-
-            if count == 4:
-                L_remove.append(xy)
-
+                    L_bonds.remove(direct)
     
     for xy in L_add:
         L_zomb.append(xy)
@@ -97,11 +105,7 @@ events = 1
 L_Nzomb, L_t = [], []
 
 while events != 0:
-    start = time.time()
-    L_pos, L_zomb, events = interactie(L_pos, L_zomb, 1, 0.43)
-    end = time.time()
-    dt = end - start
-    L_t.append(dt)
+    L_pos, L_zomb, events = interactie(L_pos, L_zomb, 1, 0.2)
     iterations = iterations + 1
     L_Nzomb.append(iterations)
 
@@ -109,8 +113,6 @@ plt.figure(1)
 data = np.array(L_pos)
 plt.xlim(-0.5, n - 0.5)
 plt.ylim(-0.5, n - 0.5)
-cmap = colors.ListedColormap(['black','red','green', 'white'])
+cmap = colors.ListedColormap(['white', 'red', 'green', 'black'])
 plt.imshow(data, interpolation='none', cmap=cmap, origin = 'lower')
-#plt.figure(2)
-#plt.plot(L_Nzomb, L_t)
 plt.show()
