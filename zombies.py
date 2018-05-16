@@ -13,7 +13,7 @@ def coordinates(direct, xy): # coordinaten transformatie
 
     return templist[0], templist[1]
     
-def zombies(n, p_thres):
+def zombies(n, p_human):
     count = 0
     start1 = time.time()
     x0 = random.randint(0, n - 1)
@@ -28,7 +28,7 @@ def zombies(n, p_thres):
     for i in range(n):
         for j in range(n):
             p = random.random()
-            if p < p_thres and L_pos[i][j] == 0:
+            if p < p_human and L_pos[i][j] == 0:
                 L_pos[i][j] = 2
                 count = count + 1
         
@@ -37,7 +37,7 @@ def zombies(n, p_thres):
     print "Factor mensen is %f" % (count / float(n ** 2))
     return L_pos, L_zomb
 
-def interactie(L_pos, L_zomb, b, k):
+def interactie(L_pos, L_zomb, a):
     L_add, L_remove = [], []
     events = 0
     for xy in L_zomb:
@@ -51,15 +51,13 @@ def interactie(L_pos, L_zomb, b, k):
                 count = count + 1
 
         if count > 0:
-            if count == 4:
-                L_remove.append(xy)
             while event == 0:
                 randir = random.randint(0, len(L_bonds) - 1)
                 direct = L_bonds[randir]
                 xnew, ynew = coordinates(direct, xy)
                 if L_pos[xnew][ynew] == 2:
                     p = random.random()
-                    if p < b / float(b + k):
+                    if p < 1 / float(1 + a):
                         L_pos[xnew][ynew] = 1
                         L_add.append((xnew, ynew))
 
@@ -71,6 +69,8 @@ def interactie(L_pos, L_zomb, b, k):
 
                 else:
                     L_bonds.remove(direct)
+        else:
+            L_remove.append(xy)
     
     for xy in L_add:
         L_zomb.append(xy)
@@ -79,6 +79,7 @@ def interactie(L_pos, L_zomb, b, k):
     for xy in L_remove:
         try:
             L_zomb.remove(xy)
+            events = events + 1
 
         except:
             pass
@@ -92,9 +93,13 @@ events = 1
 L_Nzomb, L_t = [], []
 
 while events != 0:
-    L_pos, L_zomb, events = interactie(L_pos, L_zomb, 1, 0.2)
+    start = time.time()
+    L_pos, L_zomb, events = interactie(L_pos, L_zomb, 0.4373)
+    end = time.time()
     iterations = iterations + 1
-    L_Nzomb.append(iterations)
+    dt = end - start
+    L_t.append(dt)
+    L_Nzomb.append(len(L_zomb))
 
 plt.figure(1)
 data = np.array(L_pos)
@@ -102,4 +107,6 @@ plt.xlim(-0.5, n - 0.5)
 plt.ylim(-0.5, n - 0.5)
 cmap = colors.ListedColormap(['white', 'red', 'green', 'black'])
 plt.imshow(data, interpolation='none', cmap=cmap, origin = 'lower')
+plt.figure(2)
+plt.plot(L_Nzomb, L_t)
 plt.show()
