@@ -19,7 +19,7 @@ def zombies(n, p_human, p_zombie):
     p_zombie = c * p_zombie
     p_zombie = p_human + p_zombie
     L_zomb = []
-    count = 0
+    count = -1
     start1 = time.time()
     L_pos = [[0] * (n + 1) for i in range(n + 1)] 
     for i in range(n):
@@ -34,6 +34,7 @@ def zombies(n, p_human, p_zombie):
             elif p < p_zombie:
                 L_pos[i][j] = 1
                 L_zomb.append((i, j))
+                count = count - 1
             else: L_pos[i][j] = 0
 
     x0 = random.randint(0, n - 1)
@@ -45,9 +46,9 @@ def zombies(n, p_human, p_zombie):
     end1 = time.time()
     #print "Runtime is %f" % (end1 - start1)
     #print "Factor mensen is %f" % (count / float(n ** 2))
-    return L_pos, L_zomb
+    return L_pos, L_zomb, count
 
-def interactie(L_pos, L_zomb, a):
+def interactie(L_pos, L_zomb, a, N_human, N_removed, N_zomb):
     L_add, L_remove = [], []
     events = 0
     for xy in L_zomb:
@@ -70,9 +71,13 @@ def interactie(L_pos, L_zomb, a):
                     if p < 1 / float(1 + a):
                         L_pos[xnew][ynew] = 1
                         L_add.append((xnew, ynew))
+                        N_zomb = N_zomb + 1
+                        N_human = N_human - 1
 
                     else:
                         L_pos[x][y] = 3
+                        N_removed = N_removed + 1
+                        N_zomb = N_zomb - 1
                         L_remove.append((x,y))
 
                     event = 1
@@ -94,7 +99,7 @@ def interactie(L_pos, L_zomb, a):
         except:
             pass
 
-    return L_pos, L_zomb, events
+    return L_pos, L_zomb, events, N_human, N_removed, N_zomb
 
 def cluster(L_posfinal):
     percolates = False
@@ -129,59 +134,85 @@ def cluster(L_posfinal):
 
     return percolates
         
+#def rand(L_cluster, L_pos):
 
-# n = 100
-# a = 0.4
-# L_pos, L_zomb = zombies(n, 1., 0.1)
-# events = 1
+n = 1000
+a = 0.35
+L_pos, L_zomb, N_human = zombies(n, 1., 0)
+events = 1
+N_zombie = len(L_zomb)
+N_removed = 0
+L_Nhuman, L_Nremoved, L_Nzombie = [N_human], [N_removed], [N_zombie]
+L_t = [0]
+t = 0
+tijd = 0
 
 # plt.figure(1)
 # cmap = colors.ListedColormap(['white', 'red', 'green', 'black'])
-# while events != 0:
-#     L_pos, L_zomb, events = interactie(L_pos, L_zomb, a)
-#     plt.clf()
-#     plt.xlim(-0.5, n - 0.5)
-#     plt.ylim(-0.5, n - 0.5)
-#     data = np.array(L_pos)
-#     plt.imshow(data, interpolation='none', cmap=cmap, origin = 'lower')
-#     plt.draw()
-#     plt.pause(0.1)
+while events != 0:
+    L_pos, L_zomb, events, N_human, N_removed, N_zombie = interactie(L_pos, L_zomb, a, N_human, N_removed, N_zombie)
+    start = time.time()
+    L_Nhuman.append(N_human)
+    L_Nremoved.append(N_removed)
+    L_Nzombie.append(N_zombie)
+    end = time.time()
+    tijd = tijd + end - start
+    if t % 100 == 0:
+        print tijd
+        tijd = 0
 
-# if cluster(L_pos):
-#     print 'This cluster of zombies does percolate'
+    #print len(L_zomb)
+    t = t + 1
+    L_t.append(t)
+    # plt.clf()
+    # plt.xlim(-0.5, n - 0.5)
+    # plt.ylim(-0.5, n - 0.5)
+    # data = np.array(L_pos)
+    # plt.imshow(data, interpolation='none', cmap=cmap, origin = 'lower')
+    # plt.draw()
+    # plt.pause(0.1)
+
+if cluster(L_pos):
+    print 'This cluster of zombies does percolate'
 
 
-# else:
-#     print 'This cluster of zombies does not percolate'
+else:
+    print 'This cluster of zombies does not percolate'
 
-def testcritical(a, b, n, iterations):
-    for i in range(iterations):
-        alpha = (a + b) / 2.
-        for j in range(720):
-            L_pos, L_zomb = zombies(n, 1., 0)
-            events = 1
-            while events != 0:
-                L_pos, L_zomb, events = interactie(L_pos, L_zomb, alpha)
+# def testcritical(a, b, n, iterations):
+#     for i in range(iterations):
+#         alpha = (a + b) / 2.
+#         for j in range(720):
+#             L_pos, L_zomb = zombies(n, 1., 0)
+#             events = 1
+#             while events != 0:
+#                 L_pos, L_zomb, events = interactie(L_pos, L_zomb, alpha)
 
-            if cluster(L_pos):
-                a = alpha
-                break
+#             if cluster(L_pos):
+#                 a = alpha
+#                 break
 
-        if j == 719:
-            b = alpha
+#         if j == 719:
+#             b = alpha
     
-    return a, b
+#     return a, b
 
-a, b = testcritical(0.3, 0.5, 500, 1)
-print a, b
+# a, b = testcritical(0.3, 0.5, 500, 1)
+# print a, b
 
-# plt.figure(2)
-# data = np.array(L_pos)
-# plt.xlim(-0.5, n - 0.5)
-# plt.ylim(-0.5, n - 0.5)
-# cmap = colors.ListedColormap(['white', 'red', 'green', 'black'])
-# plt.imshow(data, interpolation='none', cmap=cmap, origin = 'lower')
+plt.figure(2)
+data = np.array(L_pos)
+plt.xlim(-0.5, n - 0.5)
+plt.ylim(-0.5, n - 0.5)
+cmap = colors.ListedColormap(['white', 'red', 'green', 'black'])
+plt.imshow(data, interpolation='none', cmap=cmap, origin = 'lower')
+print L_Nzombie[-1] + L_Nremoved[-1] + L_Nhuman[-1]
+plt.figure(3)
+plt.plot(L_t, L_Nhuman, label = 'human')
+plt.plot(L_t, L_Nremoved, label = 'removed')
+plt.plot(L_t, L_Nzombie, label = 'zombie')
+plt.legend()
 
 # plt.figure(3)
 # plt.plot(L_Nzomb, L_t, 'bo')
-# plt.show()
+plt.show()
